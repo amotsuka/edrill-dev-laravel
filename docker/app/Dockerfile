@@ -1,9 +1,11 @@
 # どんなdockerイメージを利用して構築をするか
 FROM php:8.0-apache
+WORKDIR /var/www/html/laravelapp
 
 # 設定ファイルをdockerコンテナ内のPHP、Apacheに読み込ませる
-ADD php.ini /usr/local/etc/php/
-ADD 000-default.conf /etc/apache2/sites-enabled/
+COPY php.ini /usr/local/etc/php/
+COPY 000-default.conf /etc/apache2/sites-enabled/
+COPY laravelapp .
 
 # Composerのインストール
 RUN cd /usr/bin && curl -s http://getcomposer.org/installer | php && ln -s /usr/bin/composer.phar /usr/bin/composer
@@ -22,3 +24,6 @@ RUN apt-get update \
 # Laravelで必要になるmodRewriteを有効化する
 RUN mv /etc/apache2/mods-available/rewrite.load /etc/apache2/mods-enabled
 RUN /bin/sh -c a2enmod rewrite
+
+ENTRYPOINT ["/usr/local/bin/php"]
+CMD ["artisan", "migrate"]
